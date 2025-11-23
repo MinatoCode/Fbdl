@@ -1,7 +1,7 @@
 const axios = require("axios");
 const qs = require("querystring");
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, message: "Only GET allowed" });
   }
@@ -51,7 +51,6 @@ export default async function handler(req, res) {
       sd,
     };
 
-    // Always pretty-print JSON
     res.setHeader("Content-Type", "application/json");
     return res.status(200).send(JSON.stringify(output, null, 2));
   } catch (err) {
@@ -60,4 +59,5 @@ export default async function handler(req, res) {
       message: err.response?.data || err.message,
     });
   }
-}
+};
+        
