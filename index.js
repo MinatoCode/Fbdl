@@ -1,63 +1,62 @@
 const axios = require("axios");
-const qs = require("querystring");
 
-module.exports = async function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ success: false, message: "Only GET allowed" });
-  }
-
+module.exports = async function (req, res) {
   const { url } = req.query;
 
   if (!url) {
-    return res.status(400).json({ success: false, message: "Missing 'url' query parameter" });
+    return res.status(400).json({
+      success: false,
+      author: "MinatoCode",
+      message: "Missing ?url="
+    });
   }
 
-  const payload = { id: url, locale: "en" };
-  const headers = {
-    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-    "Origin": "https://likeedownloader.com",
-    "Referer": "https://likeedownloader.com/facebook-video-downloader",
-    "User-Agent":
-      "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
-    "X-Requested-With": "XMLHttpRequest",
-  };
-
   try {
+    const form = new URLSearchParams();
+    form.append("url", url);
+
     const response = await axios.post(
-      "https://likeedownloader.com/process",
-      qs.stringify(payload),
-      { headers }
+      "https://www.fbvideo.12u.in/app/main.php",
+      form,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "User-Agent":
+            "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
+          Accept: "*/*",
+          "Accept-Language": "en-IN,en;q=0.9",
+
+          // ---- Full cookies recommended for Facebook-type scrapers ----
+          Cookie:
+            "FCCDCF=1; FCNEC=1; gads=1; gpi=1;"
+        }
+      }
     );
 
-    const rawHtml = response.data.template;
+    const data = response.data;
 
-    // Extract thumbnail
-    const thumbMatch = rawHtml.match(/<img src="([^"]+)"/);
-    const thumbnail = thumbMatch ? thumbMatch[1] : null;
+    const sd =
+      data?.data?.links?.["Download Low Quality"] ||
+      data?.links?.["Download Low Quality"] ||
+      null;
 
-    // Extract HD URL
-    const hdMatch = rawHtml.match(/<span>\s*hd\s*<\/span>[\s\S]*?href="([^"]+)"/i);
-    const hd = hdMatch ? hdMatch[1] : null;
+    const hd =
+      data?.data?.links?.["Download High Quality"] ||
+      data?.links?.["Download High Quality"] ||
+      null;
 
-    // Extract SD URL
-    const sdMatch = rawHtml.match(/<span>\s*sd\s*<\/span>[\s\S]*?href="([^"]+)"/i);
-    const sd = sdMatch ? sdMatch[1] : null;
-
-    const output = {
+    return res.status(200).json({
       success: true,
-      originalUrl: url,
-      thumbnail,
-      hd,
+      author: "MinatoCode",
+      platform: "facebook",
       sd,
-    };
-
-    res.setHeader("Content-Type", "application/json");
-    return res.status(200).send(JSON.stringify(output, null, 2));
+      hd
+    });
   } catch (err) {
     return res.status(500).json({
       success: false,
-      message: err.response?.data || err.message,
+      author: "MinatoCode",
+      error: err.message
     });
   }
 };
-        
