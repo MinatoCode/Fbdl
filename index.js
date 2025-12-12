@@ -1,14 +1,23 @@
 const axios = require("axios");
 
+// ---- Pretty Print Function ----
+function pretty(obj) {
+  return JSON.stringify(obj, null, 2); // always pretty print
+}
+
 module.exports = async function (req, res) {
+  res.setHeader("Content-Type", "application/json"); // force JSON output
+
   const { url } = req.query;
 
   if (!url) {
-    return res.status(400).json({
-      success: false,
-      author: "MinatoCode",
-      message: "Missing ?url="
-    });
+    return res.status(400).send(
+      pretty({
+        success: false,
+        author: "MinatoCode",
+        message: "Missing ?url="
+      })
+    );
   }
 
   try {
@@ -25,10 +34,7 @@ module.exports = async function (req, res) {
             "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Mobile Safari/537.36",
           Accept: "*/*",
           "Accept-Language": "en-IN,en;q=0.9",
-
-          // ---- Full cookies recommended for Facebook-type scrapers ----
-          Cookie:
-            "FCCDCF=1; FCNEC=1; gads=1; gpi=1;"
+          Cookie: "FCCDCF=1; FCNEC=1; gads=1; gpi=1;"
         }
       }
     );
@@ -45,18 +51,23 @@ module.exports = async function (req, res) {
       data?.links?.["Download High Quality"] ||
       null;
 
-    return res.status(200).json({
-      success: true,
-      author: "MinatoCode",
-      platform: "facebook",
-      sd,
-      hd
-    });
+    return res.status(200).send(
+      pretty({
+        success: true,
+        author: "MinatoCode",
+        platform: "facebook",
+        sd,
+        hd
+      })
+    );
   } catch (err) {
-    return res.status(500).json({
-      success: false,
-      author: "MinatoCode",
-      error: err.message
-    });
+    return res.status(500).send(
+      pretty({
+        success: false,
+        author: "MinatoCode",
+        error: err.message
+      })
+    );
   }
 };
+      
