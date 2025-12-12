@@ -16,7 +16,7 @@ module.exports = async function (req, res) {
     form.append("url", url);
 
     const response = await axios.post(
-      "https://www.fbvideo.12u.in/app/main.php",
+      "https://www.fbvideo.l2u.in/app/main.php",
       form,
       {
         headers: {
